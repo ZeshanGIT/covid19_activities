@@ -28,7 +28,6 @@ class UpdateModel {
     desc = map['desc'];
     links = map['links'];
     date = map['date'];
-    print('map');
   }
 
   @override

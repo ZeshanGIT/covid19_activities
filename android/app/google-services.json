@@ -1,71 +1,34 @@
 {
   "project_info": {
-    "project_number": "138588517041",
-    "firebase_url": "https://arunachalamproject-sms.firebaseio.com",
-    "project_id": "arunachalamproject-sms",
-    "storage_bucket": "arunachalamproject-sms.appspot.com"
+    "project_number": "949540361866",
+    "firebase_url": "https://covid-activities-1bf8e.firebaseio.com",
+    "project_id": "covid-activities-1bf8e",
+    "storage_bucket": "covid-activities-1bf8e.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:138588517041:android:b598743e8aca65e5166890",
+        "mobilesdk_app_id": "1:949540361866:android:9694dba8fcc80dad5dbf73",
         "android_client_info": {
-          "package_name": "com.dsc.app.test"
+          "package_name": "edu.sastra.covid19_activities"
         }
       },
       "oauth_client": [
         {
-          "client_id": "138588517041-vdvatruimr1h7742iojh4panojn6acjo.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "com.dsc.app.test",
-            "certificate_hash": "24bb1d3bf5a816ff4a03654a744fa86d18fd50c5"
-          }
-        },
-        {
-          "client_id": "138588517041-d79uo4jo5lasdslhcd8i5s5vfddql7gb.apps.googleusercontent.com",
+          "client_id": "949540361866-jlipcnj3iktifj3hncemgb9ivqpehoea.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyB3w8JG-mPqIejLtqAgA4nBu4to_ga8MSU"
+          "current_key": "AIzaSyDZHwJ2iM7NGjdP3IqdhgcKsMULtLoi3_g"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "138588517041-d79uo4jo5lasdslhcd8i5s5vfddql7gb.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:138588517041:android:f28aa58ddc87ead0166890",
-        "android_client_info": {
-          "package_name": "com.example.covid19_activities"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "138588517041-d79uo4jo5lasdslhcd8i5s5vfddql7gb.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyB3w8JG-mPqIejLtqAgA4nBu4to_ga8MSU"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "138588517041-d79uo4jo5lasdslhcd8i5s5vfddql7gb.apps.googleusercontent.com",
+              "client_id": "949540361866-jlipcnj3iktifj3hncemgb9ivqpehoea.apps.googleusercontent.com",
               "client_type": 3
             }
           ]

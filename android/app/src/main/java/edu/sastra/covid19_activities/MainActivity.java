@@ -1,4 +1,4 @@
-package com.example.covid19_activities;
+package edu.sastra.covid19_activities;
 
 import androidx.annotation.NonNull;
 

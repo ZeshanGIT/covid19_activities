@@ -38,9 +38,13 @@ android {
         disable 'InvalidPackage'
     }
 
+    dexOptions {
+        javaMaxHeapSize "4g"
+    } 
+
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.example.covid19_activities"
+        applicationId "edu.sastra.covid19_activities"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()
@@ -58,6 +62,9 @@ android {
     }
     buildTypes {
         release {
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro' 
             signingConfig signingConfigs.release
         }
     }

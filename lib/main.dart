@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:after_layout/after_layout.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:covid19_activities/id_collection.dart';
 import 'package:covid19_activities/update_collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,6 +12,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:share/share.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import 'package:device_id/device_id.dart';
 
 void main() {
   runApp(MyApp());
@@ -43,7 +45,7 @@ class Home extends StatefulWidget {
   _HomeState createState() => _HomeState();
 }
 
-class _HomeState extends State<Home> with AfterLayoutMixin {
+class _HomeState extends State<Home> {
   int current = 0;
 
   PageController _controller;
@@ -80,7 +82,7 @@ class _HomeState extends State<Home> with AfterLayoutMixin {
             duration: Duration(milliseconds: 300), curve: Curves.easeInOut);
         setState(() => current = i);
       },
-      selectedItemColor: Colors.deepPurple,
+      selectedItemColor: const Color(0xFF3D2B9B),
       selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
       currentIndex: current,
       items: [
@@ -115,9 +117,6 @@ class _HomeState extends State<Home> with AfterLayoutMixin {
       ],
     );
   }
-
-  @override
-  void afterFirstLayout(BuildContext context) {}
 }
 
 class SelfCheck extends StatefulWidget {
@@ -130,6 +129,11 @@ class SelfCheck extends StatefulWidget {
 }
 
 class _SelfCheckState extends State<SelfCheck> {
+  @override
+  void initState() {
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -154,26 +158,205 @@ class _SelfCheckState extends State<SelfCheck> {
               source: 'Chandigarh University',
             ),
             size16box,
-            Container(
-              width: double.maxFinite,
-              padding: edge16Insets,
-              decoration: BoxDecoration(
-                color: Colors.orange.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(16),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                'Wash your hands every 2 hours',
-                style: TextStyle(
-                  color: Colors.orange.shade800,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 18,
-                ),
-              ),
-            )
+            FutureBuilder(
+              future: DeviceId.getID,
+              builder: (_, ass) => ass.hasData
+                  ? StreamBuilder<bool>(
+                      stream: IdCollection(ass.data).hasId,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasData) {
+                          if (snapshot.data)
+                            return Container(
+                              width: double.maxFinite,
+                              padding: edge16Insets,
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'You have already agreed to the agreements',
+                                style: TextStyle(
+                                  color: Colors.orange.shade800,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            );
+                          return InkWell(
+                            onTap: () {
+                              Navigator.of(context).push(MaterialPageRoute(
+                                builder: (_) => SelfCheckAgreements(),
+                              ));
+                            },
+                            child: Container(
+                              width: double.maxFinite,
+                              padding: edge16Insets,
+                              decoration: BoxDecoration(
+                                color: Colors.orange.withOpacity(0.2),
+                                borderRadius: BorderRadius.circular(16),
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                'Self Declaration by students',
+                                style: TextStyle(
+                                  color: Colors.orange.shade800,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 18,
+                                ),
+                              ),
+                            ),
+                          );
+                        } else
+                          return CircularProgressIndicator();
+                      })
+                  : Container(
+                      width: double.maxFinite,
+                      padding: edge16Insets,
+                      decoration: BoxDecoration(
+                        color: Colors.orange.withOpacity(0.2),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      alignment: Alignment.center,
+                      child: CircularProgressIndicator(),
+                    ),
+            ),
+            size16box,
+            StreamBuilder(
+              stream:
+                  Firestore.instance.document('count/count').snapshots().map(
+                        (e) => (e.data['count'] as int),
+                      ),
+              builder: (_, ass) => ass.data != null
+                  ? Text(
+                      '${ass.data.toString()} people have agreed to this',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    )
+                  : Container(),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class SelfCheckAgreements extends StatefulWidget {
+  @override
+  _SelfCheckAgreementsState createState() => _SelfCheckAgreementsState();
+}
+
+class _SelfCheckAgreementsState extends State<SelfCheckAgreements> {
+  PageController _controller = PageController();
+
+  bool uploading = false;
+
+  iWill() async {
+    if (_controller.page.floor() == 4) {
+      setState(() {
+        uploading = true;
+      });
+      String id = await DeviceId.getID;
+      await IdCollection(id).addId();
+      Navigator.of(context).pop();
+    } else
+      _controller.nextPage(
+        duration: Duration(milliseconds: 200),
+        curve: Curves.easeInOut,
+      );
+  }
+
+//   Self Declaration by students
+
+// 1. I agree to maintain social distancing during my travel and after reaching the campus
+// 2. When I left home I did not have any symptoms of Covid 19 including (but are not limited to) fever, cough, sore throat, fatigue and shortness of breath.
+// 3. I agree to wash the hands for 20 seconds periodically
+// 4. I have with me a pair of reusable face masks, which I will be using during my stay at University campus without fail
+// 5. I have enough stock of Handwash/Sanitizer for one month
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(32),
+          child: PageView(
+            physics: NeverScrollableScrollPhysics(),
+            controller: _controller,
+            children: <Widget>[
+              Agreement(
+                iWill: iWill,
+                title:
+                    'I agree to maintain social distancing during my travel and after reaching the campus',
+                img: 'sd',
+              ),
+              Agreement(
+                iWill: iWill,
+                title:
+                    'When I left home I did not have any symptoms of Covid 19 including (but are not limited to) fever, cough, sore throat, fatigue and shortness of breath.',
+                img: 'covid',
+              ),
+              Agreement(
+                iWill: iWill,
+                title: 'I agree to wash the hands for 20 seconds periodically',
+                img: 'hw',
+              ),
+              Agreement(
+                iWill: iWill,
+                title:
+                    'I have with me a pair of reusable face masks, which I will be using during my stay at University campus without fail',
+                img: 'mask',
+              ),
+              Agreement(
+                iWill: iWill,
+                title:
+                    'I have enough stock of Handwash/Sanitizer for one month',
+                img: 'sani',
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class Agreement extends StatelessWidget {
+  final String title, img;
+  final Function iWill;
+  Agreement({
+    this.title,
+    this.img,
+    this.iWill,
+  });
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: <Widget>[
+        Text(title, style: titleTextStyle),
+        size32box,
+        Image.asset('assets/$img.png',height: 256),
+        size32box,
+        FlatButton(
+          highlightColor: Colors.amber.withOpacity(0.5),
+          splashColor: Colors.white70,
+          color: Colors.amber.withOpacity(0.2),
+          shape: StadiumBorder(),
+          onPressed: iWill,
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Text(
+            'Yes',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              color: Colors.amber.shade800,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -227,11 +410,12 @@ class AacademicUpdates extends StatelessWidget {
       stream: UpdateCollection().getUpdates(),
       initialData: [],
       builder: (_, ass) => Container(
-        padding: edge32Insets,
+        padding: const EdgeInsets.symmetric(horizontal: 32),
         child: SingleChildScrollView(
           physics: BouncingScrollPhysics(),
           child: Column(
             children: [
+              size32box,
               banner,
               size16box,
               Text(
@@ -240,8 +424,9 @@ class AacademicUpdates extends StatelessWidget {
               ),
               size32box,
               ...((ass.data == null || ass.data.isEmpty)
-                  ? buildCircularProgressIndicator(ass.data)
+                  ? buildCircularProgressIndicator()
                   : ass.data.map((e) => AcademicUpdateCard(e)).toList()),
+              size32box,
             ],
           ),
         ),
@@ -249,8 +434,7 @@ class AacademicUpdates extends StatelessWidget {
     );
   }
 
-  List<Widget> buildCircularProgressIndicator(k) {
-    print(k);
+  List<Widget> buildCircularProgressIndicator() {
     return [CircularProgressIndicator()];
   }
 }
@@ -313,7 +497,7 @@ class GuidlinesCard extends StatelessWidget {
 }
 
 class AcademicUpdateCard extends StatelessWidget {
-  const AcademicUpdateCard(
+  AcademicUpdateCard(
     this.map, {
     Key key,
   }) : super(key: key);
@@ -343,9 +527,12 @@ class AcademicUpdateCard extends StatelessWidget {
                   ),
                   Spacer(),
                   GestureDetector(
-                    onTap: () {
+                    onTap: () async {
+                      String link =
+                          (await Firestore.instance.document('link/link').get())
+                              .data['link'];
                       Share.share(
-                          '*${map['title']}*\n${map['desc']}\n\n${(map['links'] as List).map((e) => '$e\n').toList().toString().replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '').replaceAll('[', '').replaceAll(']', '')}\nDowload the app for more updates\nhttps://play.google.com/store/apps/details?id=edu.sastra.covid19_activities');
+                          '*${map['title'] ?? ''}*\n${map['desc'] ?? ''}\n\n${(map['links'] as List).map((e) => '$e\n').toList().toString().replaceAll(' ', '').replaceAll('(', '').replaceAll(')', '').replaceAll('[', '').replaceAll(']', '')}\nDownlaod the app for more updates:\n$link');
                     },
                     child: Icon(Icons.share),
                   ),
@@ -379,10 +566,11 @@ class AcademicUpdateCard extends StatelessWidget {
                     )
                     .toList(),
               size16box,
-              Text(
-                '${t.day}/${t.month}/${t.year}\t${t.hour} : ${t.minute}',
-                style: TextStyle(color: Colors.black54),
-              ),
+              if (t.hour != 0)
+                Text(
+                  '${t.day}/${t.month}/${t.year}\t${t.hour} : ${t.minute}',
+                  style: TextStyle(color: Colors.black54),
+                ),
             ],
           ),
         ),
